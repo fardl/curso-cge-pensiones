@@ -1,0 +1,508 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{lmodern}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\usetheme{Madrid}
+\usecolortheme{seahorse}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+\definecolor{macropolblue}{RGB}{24,68,120}
+\definecolor{macropolgreen}{RGB}{56,128,98}
+\definecolor{codegray}{RGB}{245,245,245}
+\definecolor{darkgray}{RGB}{70,70,70}
+
+\setbeamercolor{title}{fg=macropolblue}
+\setbeamercolor{frametitle}{fg=macropolblue}
+\setbeamercolor{structure}{fg=macropolblue}
+\setbeamercolor{block title}{bg=macropolblue!85,fg=white}
+\setbeamercolor{block body}{bg=macropolblue!5,fg=black}
+
+\lstdefinestyle{Rstyle}{
+  language=R,
+  backgroundcolor=\color{codegray},
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{macropolblue}\bfseries,
+  commentstyle=\color{darkgray}\itshape,
+  stringstyle=\color{macropolgreen},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{gray!30}
+}
+\lstset{style=Rstyle}
+
+\title[Sesión 2: R, datos y visualizacion]{Sesión 2: R, estructura del proyecto, limpieza de datos y visualizacion}
+\subtitle{Curso: Modelos CGE y Microsimulación aplicados al Sistema de Pensiones de Capitalización Individual}
+\author{MACROPOL: Economía Aplicada y Políticas Públicas}
+\date{ }
+
+\begin{document}
+
+% 1
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% 2
+\begin{frame}{Objetivo de la sesión}
+\begin{block}{Meta práctica}
+Al finalizar la sesión, cada participante debe tener un proyecto en R organizado, reproducible y capaz de cargar, limpiar, transformar y visualizar una base preliminar para análisis previsional.
+\end{block}
+
+\vspace{0.3cm}
+La sesión conecta tres piezas:
+\begin{enumerate}
+  \item \textbf{Estructura del proyecto}: cómo organizar archivos, datos y scripts.
+  \item \textbf{Limpieza de datos}: cómo pasar de datos crudos a datos analíticos.
+  \item \textbf{Visualizacion}: cómo producir evidencia clara para diagnóstico y política pública.
+\end{enumerate}
+\end{frame}
+
+% 3
+\begin{frame}{Dónde estamos en el roadmap del curso}
+\centering
+\begin{tikzpicture}[node distance=0.9cm, every node/.style={font=\small}]
+\node[draw, rounded corners, fill=macropolblue!10, minimum width=5.0cm, minimum height=0.6cm] (A) {A. Motivación y evidencia internacional};
+\node[draw, rounded corners, fill=macropolgreen!25, below of=A, minimum width=5.0cm, minimum height=0.6cm] (B) {B. Herramientas cuantitativas en R};
+\node[draw, rounded corners, fill=gray!10, below of=B, minimum width=5.0cm, minimum height=0.6cm] (C) {C. Microeconomía para CGE};
+\node[draw, rounded corners, fill=gray!10, below of=C, minimum width=5.0cm, minimum height=0.6cm] (D) {D. SAM y modelo CGE};
+\node[draw, rounded corners, fill=gray!10, below of=D, minimum width=5.0cm, minimum height=0.6cm] (E) {E. Microsimulación previsional};
+\node[draw, rounded corners, fill=gray!10, below of=E, minimum width=5.0cm, minimum height=0.6cm] (F) {F. Integración y proyecto final};
+\draw[->, thick] (A) -- (B);
+\draw[->, thick] (B) -- (C);
+\draw[->, thick] (C) -- (D);
+\draw[->, thick] (D) -- (E);
+\draw[->, thick] (E) -- (F);
+\end{tikzpicture}
+\end{frame}
+
+% 4
+\begin{frame}{Por qué iniciar con herramientas}
+\begin{block}{Idea central}
+Un modelo CGE o una microsimulación no comienzan con ecuaciones. Comienzan con un flujo de trabajo ordenado.
+\end{block}
+
+\vspace{0.3cm}
+Errores comunes en proyectos cuantitativos:
+\begin{itemize}
+  \item archivos duplicados o sin versión;
+  \item bases modificadas manualmente;
+  \item scripts que dependen de rutas locales;
+  \item resultados que no pueden reproducirse;
+  \item gráficos sin narrativa de política pública.
+\end{itemize}
+\end{frame}
+
+% 5
+\begin{frame}{Principio de trabajo del curso}
+\centering
+\Large
+\textbf{Toda simulación debe ser reproducible.}
+
+\vspace{0.6cm}
+\normalsize
+\begin{tikzpicture}[node distance=1.6cm, every node/.style={font=\small}]
+\node[draw, rounded corners, fill=macropolblue!10, minimum width=2.1cm, minimum height=0.8cm] (data) {Datos};
+\node[draw, rounded corners, fill=macropolblue!10, right of=data, xshift=1.0cm, minimum width=2.1cm, minimum height=0.8cm] (code) {Código};
+\node[draw, rounded corners, fill=macropolblue!10, right of=code, xshift=1.0cm, minimum width=2.1cm, minimum height=0.8cm] (out) {Resultados};
+\node[draw, rounded corners, fill=macropolblue!10, right of=out, xshift=1.0cm, minimum width=2.1cm, minimum height=0.8cm] (brief) {Decisión};
+\draw[->, thick] (data) -- (code);
+\draw[->, thick] (code) -- (out);
+\draw[->, thick] (out) -- (brief);
+\end{tikzpicture}
+
+\vspace{0.5cm}
+\normalsize
+Si una persona no puede reconstruir el resultado desde los datos y el código, el resultado no está listo para política pública.
+\end{frame}
+
+% 6
+\begin{frame}[fragile]{Estructura del proyecto}
+\begin{lstlisting}[language=bash]
+Curso_CGE_Pensiones/
+|-- data/
+|   |-- raw/          # datos originales, nunca se editan
+|   |-- intermediate/ # datos parcialmente procesados
+|   |-- clean/        # base analitica final
+|
+|-- R/
+|   |-- 00_setup.R
+|   |-- 01_importar_datos.R
+|   |-- 02_limpieza_datos.R
+|   |-- 03_visualizacion.R
+|   |-- 04_indicadores_previsionales.R
+|
+|-- outputs/
+|   |-- figures/
+|   |-- tables/
+|
+|-- docs/
+|-- README.md
+|-- Curso_CGE_Pensiones.Rproj
+\end{lstlisting}
+\end{frame}
+
+% 7
+\begin{frame}{Regla de oro para los datos}
+\begin{block}{Los datos originales no se modifican}
+La carpeta \texttt{data/raw/} debe contener la base tal como fue recibida. Todas las transformaciones se hacen mediante código.
+\end{block}
+
+\vspace{0.3cm}
+Esto permite:
+\begin{itemize}
+  \item auditar cambios;
+  \item corregir errores sin reconstruir manualmente;
+  \item actualizar bases cuando llegan nuevas rondas de información;
+  \item documentar claramente el puente entre microdatos y resultados.
+\end{itemize}
+\end{frame}
+
+% 8
+\begin{frame}[fragile]{Script 00: configuración}
+\begin{lstlisting}
+# 00_setup.R
+rm(list = ls())
+
+paquetes <- c(
+  "tidyverse", "data.table", "janitor", "here",
+  "readxl", "scales", "skimr"
+)
+
+instalar <- paquetes[!paquetes %in% installed.packages()[, "Package"]]
+if (length(instalar) > 0) install.packages(instalar)
+
+invisible(lapply(paquetes, library, character.only = TRUE))
+
+# Rutas principales
+path_raw   <- here::here("data", "raw")
+path_clean <- here::here("data", "clean")
+path_fig   <- here::here("outputs", "figures")
+path_tab   <- here::here("outputs", "tables")
+\end{lstlisting}
+\end{frame}
+
+% 9
+\begin{frame}{Datos para la sesión}
+Usaremos una base sintética con información individual inspirada en microdatos laborales y previsionales.
+
+\vspace{0.3cm}
+Variables principales:
+\begin{itemize}
+  \item edad;
+  \item sexo;
+  \item nivel educativo;
+  \item ingreso laboral;
+  \item condición de formalidad;
+  \item afiliación previsional;
+  \item densidad de cotización;
+  \item saldo acumulado;
+  \item factor de expansión.
+\end{itemize}
+
+\vspace{0.2cm}
+El objetivo no es estimar todavía el modelo final, sino aprender el flujo de trabajo.
+\end{frame}
+
+% 10
+\begin{frame}[fragile]{Script 01: importar datos}
+\begin{lstlisting}
+# 01_importar_datos.R
+source(here::here("R", "00_setup.R"))
+
+personas_raw <- readr::read_csv(
+  here::here("data", "raw", "personas_pensiones_sintetica.csv"),
+  show_col_types = FALSE
+)
+
+# Estandarizar nombres de variables
+personas <- personas_raw |>
+  janitor::clean_names()
+
+glimpse(personas)
+skimr::skim(personas)
+\end{lstlisting}
+\end{frame}
+
+% 11
+\begin{frame}{Diagnóstico inicial de calidad}
+Antes de limpiar, observamos.
+
+\vspace{0.3cm}
+Preguntas básicas:
+\begin{itemize}
+  \item ¿Cuántas observaciones tiene la base?
+  \item ¿Qué variables son numéricas, categóricas o texto?
+  \item ¿Hay valores faltantes?
+  \item ¿Existen edades, ingresos o saldos imposibles?
+  \item ¿La variable de expansión está disponible?
+\end{itemize}
+
+\vspace{0.2cm}
+En pensiones, los errores de datos pueden traducirse en diagnósticos equivocados de suficiencia y cobertura.
+\end{frame}
+
+% 12
+\begin{frame}[fragile]{Script 02: reglas de limpieza}
+\begin{lstlisting}
+# 02_limpieza_datos.R
+source(here::here("R", "00_setup.R"))
+source(here::here("R", "01_importar_datos.R"))
+
+personas_clean <- personas |>
+  filter(edad >= 15, edad <= 100) |>
+  mutate(
+    ingreso_laboral = if_else(ingreso_laboral < 0, NA_real_, ingreso_laboral),
+    saldo_afp       = if_else(saldo_afp < 0, NA_real_, saldo_afp),
+    formal          = if_else(formal == 1, "Formal", "Informal"),
+    afiliado_afp    = if_else(afiliado_afp == 1, "Afiliado", "No afiliado"),
+    grupo_edad = case_when(
+      edad < 30 ~ "15-29",
+      edad < 45 ~ "30-44",
+      edad < 60 ~ "45-59",
+      TRUE      ~ "60+"
+    )
+  )
+\end{lstlisting}
+\end{frame}
+
+% 13
+\begin{frame}[fragile]{Crear variables analíticas}
+\begin{lstlisting}
+personas_clean <- personas_clean |>
+  mutate(
+    cotizante = if_else(formal == "Formal" & afiliado_afp == "Afiliado", 1, 0),
+    aporte_anual_estimado = ingreso_laboral * 12 * 0.10 * cotizante,
+    quintil_ingreso = ntile(ingreso_laboral, 5),
+    tasa_aporte_efectiva = aporte_anual_estimado / (ingreso_laboral * 12)
+  )
+
+readr::write_csv(
+  personas_clean,
+  here::here("data", "clean", "personas_pensiones_clean.csv")
+)
+\end{lstlisting}
+\end{frame}
+
+% 14
+\begin{frame}{Variables puente hacia el modelo previsional}
+\begin{table}
+\centering
+\small
+\begin{tabular}{p{3.6cm} p{4.0cm} p{4.0cm}}
+\toprule
+Variable & Uso en microsimulación & Uso en CGE \\
+\midrule
+Ingreso laboral & salario inicial por individuo & masa salarial agregada \\
+Formalidad & densidad de cotización & mercado laboral formal/informal \\
+Edad & cohorte y horizonte de retiro & estructura demográfica \\
+Afiliación AFP & cobertura previsional & contribuciones agregadas \\
+Saldo AFP & riqueza previsional inicial & ahorro financiero \\
+Factor expansión & agregación poblacional & cierre macro-micro \\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{frame}
+
+% 15
+\begin{frame}{Del dato individual al indicador agregado}
+\begin{block}{Ejemplo}
+La cobertura previsional no es solo el porcentaje de afiliados en la muestra. Debe calcularse usando factores de expansión.
+\end{block}
+
+\vspace{0.3cm}
+\[
+Cobertura = \frac{\sum_i w_i \cdot Afiliado_i}{\sum_i w_i}
+\]
+
+\vspace{0.2cm}
+Donde \(w_i\) es el factor de expansión del individuo \(i\).
+\end{frame}
+
+% 16
+\begin{frame}[fragile]{Indicadores ponderados}
+\begin{lstlisting}
+indicadores <- personas_clean |>
+  summarise(
+    poblacion = sum(factor_expansion, na.rm = TRUE),
+    cobertura_afp = weighted.mean(afiliado_afp == "Afiliado",
+                                  factor_expansion, na.rm = TRUE),
+    formalidad = weighted.mean(formal == "Formal",
+                               factor_expansion, na.rm = TRUE),
+    ingreso_promedio = weighted.mean(ingreso_laboral,
+                                     factor_expansion, na.rm = TRUE),
+    saldo_promedio = weighted.mean(saldo_afp,
+                                  factor_expansion, na.rm = TRUE)
+  )
+
+indicadores
+\end{lstlisting}
+\end{frame}
+
+% 17
+\begin{frame}{Visualizacion para política pública}
+Un buen gráfico debe responder una pregunta concreta.
+
+\vspace{0.3cm}
+Ejemplos:
+\begin{itemize}
+  \item ¿La cobertura aumenta con el ingreso?
+  \item ¿La formalidad varía por edad?
+  \item ¿Dónde se concentran los trabajadores sin AFP?
+  \item ¿Qué grupos tendrían menor tasa de reemplazo?
+  \item ¿Cómo cambia el diagnóstico antes y después de una reforma?
+\end{itemize}
+
+\vspace{0.2cm}
+Visualizar no es decorar. Es revelar una relación económica.
+\end{frame}
+
+% 18
+\begin{frame}[fragile]{Gráfico 1: cobertura por quintil}
+\begin{lstlisting}
+p1 <- personas_clean |>
+  group_by(quintil_ingreso) |>
+  summarise(
+    cobertura = weighted.mean(afiliado_afp == "Afiliado",
+                              factor_expansion, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  ggplot(aes(x = factor(quintil_ingreso), y = cobertura)) +
+  geom_col() +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    title = "Cobertura AFP por quintil de ingreso",
+    x = "Quintil de ingreso laboral",
+    y = "Cobertura"
+  ) +
+  theme_minimal()
+\end{lstlisting}
+\end{frame}
+
+% 19
+\begin{frame}[fragile]{Gráfico 2: ingreso laboral por edad y formalidad}
+\begin{lstlisting}
+p2 <- personas_clean |>
+  filter(!is.na(ingreso_laboral)) |>
+  ggplot(aes(x = edad, y = ingreso_laboral)) +
+  geom_point(alpha = 0.15) +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~ formal) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "Perfil edad-ingreso por formalidad",
+    x = "Edad",
+    y = "Ingreso laboral mensual"
+  ) +
+  theme_minimal()
+\end{lstlisting}
+\end{frame}
+
+% 20
+\begin{frame}[fragile]{Gráfico 3: saldo AFP por grupo de edad}
+\begin{lstlisting}
+p3 <- personas_clean |>
+  filter(afiliado_afp == "Afiliado") |>
+  ggplot(aes(x = grupo_edad, y = saldo_afp)) +
+  geom_boxplot(outlier.alpha = 0.2) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "Distribucion del saldo AFP por grupo de edad",
+    x = "Grupo de edad",
+    y = "Saldo acumulado"
+  ) +
+  theme_minimal()
+\end{lstlisting}
+\end{frame}
+
+% 21
+\begin{frame}[fragile]{Guardar resultados}
+\begin{lstlisting}
+ggsave(
+  filename = here::here("outputs", "figures", "cobertura_quintil.png"),
+  plot = p1, width = 8, height = 5, dpi = 300
+)
+
+ggsave(
+  filename = here::here("outputs", "figures", "perfil_edad_ingreso.png"),
+  plot = p2, width = 8, height = 5, dpi = 300
+)
+
+ggsave(
+  filename = here::here("outputs", "figures", "saldo_afp_edad.png"),
+  plot = p3, width = 8, height = 5, dpi = 300
+)
+\end{lstlisting}
+\end{frame}
+
+% 22
+\begin{frame}{Mini-laboratorio de la sesión}
+\begin{enumerate}
+  \item Crear la estructura del proyecto.
+  \item Cargar la base sintética de personas.
+  \item Limpiar nombres y valores inválidos.
+  \item Crear variables previsionales básicas.
+  \item Calcular cobertura, formalidad e ingreso promedio.
+  \item Construir tres gráficos de diagnóstico.
+  \item Guardar la base limpia y las figuras.
+\end{enumerate}
+\end{frame}
+
+% 23
+\begin{frame}{Conexión con las siguientes sesiones}
+Lo construido hoy alimenta directamente los módulos posteriores.
+
+\vspace{0.3cm}
+\begin{table}
+\centering
+\small
+\begin{tabular}{p{4.0cm} p{7.0cm}}
+\toprule
+Producto de hoy & Uso posterior \\
+\midrule
+Base limpia & Microsimulación de tasas de reemplazo \\
+Cobertura por grupo & Diagnóstico previsional inicial \\
+Masa salarial & Contribuciones agregadas al CGE \\
+Formalidad & Segmentación del mercado laboral \\
+Saldo AFP & Stock inicial de riqueza previsional \\
+Gráficos & Insumos para policy brief \\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{frame}
+
+% 24
+\begin{frame}{Buenas prácticas desde el inicio}
+\begin{itemize}
+  \item Nunca editar manualmente bases crudas.
+  \item Usar rutas relativas con \texttt{here()}.
+  \item Separar importación, limpieza, análisis y visualizacion.
+  \item Guardar resultados en carpetas estandarizadas.
+  \item Nombrar scripts con orden numérico.
+  \item Escribir comentarios breves, pero útiles.
+  \item Pensar cada gráfico como respuesta a una pregunta.
+\end{itemize}
+\end{frame}
+
+% 25
+\begin{frame}{Cierre}
+\begin{block}{Mensaje principal}
+Antes de construir un CGE o una microsimulación, necesitamos una cadena de trabajo confiable: datos ordenados, código reproducible e indicadores interpretables.
+\end{block}
+
+\vspace{0.4cm}
+En la próxima sesión entraremos al repaso microeconómico que da sentido económico a las ecuaciones del modelo.
+\end{frame}
+
+\end{document}

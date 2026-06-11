@@ -1,0 +1,780 @@
+\documentclass[10pt,aspectratio=169]{beamer}
+
+% ------------------------------------------------------------
+% Presentacion 01 - Curso CGE y Microsimulacion Pensiones
+% MACROPOL: Economia Aplicada y Politicas Publicas
+% ------------------------------------------------------------
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{ragged2e}
+\usepackage{listings}
+
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc}
+
+% ------------------------------------------------------------
+% Colores y estilo
+% ------------------------------------------------------------
+\definecolor{macropolblue}{RGB}{18,54,96}
+\definecolor{macropolgreen}{RGB}{31,120,93}
+\definecolor{macropolgray}{RGB}{90,90,90}
+\definecolor{lightblue}{RGB}{232,240,249}
+\definecolor{lightgreen}{RGB}{232,246,240}
+\definecolor{lightgray}{RGB}{245,245,245}
+\definecolor{accentorange}{RGB}{210,115,45}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamercolor{structure}{fg=macropolblue}
+\setbeamercolor{frametitle}{fg=white,bg=macropolblue}
+\setbeamercolor{title}{fg=white,bg=macropolblue}
+\setbeamercolor{block title}{fg=white,bg=macropolblue}
+\setbeamercolor{block body}{fg=black,bg=lightblue}
+\setbeamercolor{alerted text}{fg=accentorange}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\color{macropolgreen}$\blacktriangleright$}
+\setbeamertemplate{itemize subitem}{\color{macropolgreen}$\circ$}
+\setbeamertemplate{footline}[frame number]
+
+\hypersetup{colorlinks=true, urlcolor=macropolblue, linkcolor=macropolblue}
+
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  backgroundcolor=\color{lightgray},
+  frame=single,
+  breaklines=true,
+  columns=fullflexible
+}
+
+% ------------------------------------------------------------
+% Macros simples
+% ------------------------------------------------------------
+\newcommand{\bigquestion}[1]{
+\begin{center}
+\Large\bfseries\color{macropolblue} #1
+\end{center}
+}
+
+\newcommand{\source}[1]{\vspace{0.2cm}{\tiny\color{macropolgray} Fuente / referencia: #1}}
+
+% ------------------------------------------------------------
+% Datos de la presentacion
+% ------------------------------------------------------------
+\title[Curso CGE y Pensiones]{Modelos CGE y Microsimulaciones aplicados al Sistema de Pensiones de Capitalizacion Individual}
+\subtitle{Presentacion 1: Roadmap del curso, motivacion internacional y arquitectura del modelo}
+\author[MACROPOL]{Francisco Alberto Ramirez de Leon\\MACROPOL: Economia Aplicada y Politicas Publicas}
+\date{2026}
+
+\begin{document}
+
+% ------------------------------------------------------------
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Proposito de la primera sesion}
+\justifying
+Esta primera sesion busca construir la intuicion general del curso antes de entrar en ecuaciones, codigo y calibracion.
+
+\vspace{0.3cm}
+\begin{block}{Idea central}
+Una reforma previsional no es solo un cambio actuarial. Tambien afecta el mercado laboral, el ahorro, la inversion, el consumo, la distribucion del ingreso y la sostenibilidad fiscal.
+\end{block}
+
+\vspace{0.2cm}
+Al final de la sesion, el participante debe entender por que necesitamos combinar:
+\begin{itemize}
+  \item modelos de Equilibrio General Computable, CGE;
+  \item microsimulacion de hogares, trabajadores y cohortes;
+  \item datos administrativos y encuestas de hogares;
+  \item comunicacion de resultados para politica publica.
+\end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{La pregunta que organiza todo el curso}
+\bigquestion{Si reformamos el sistema de capitalizacion individual, ¿quien gana, quien pierde y que ocurre con la economia?}
+
+\vspace{0.2cm}
+Ejemplos de reformas:
+\begin{itemize}
+  \item aumentar la tasa de contribucion;
+  \item modificar la edad de retiro;
+  \item introducir una pension minima garantizada;
+  \item reducir comisiones o cambiar reglas de inversion;
+  \item fortalecer incentivos a la formalizacion.
+\end{itemize}
+
+\vspace{0.3cm}
+\begin{alertblock}{Mensaje}
+La calidad de la respuesta depende del modelo, de los datos y de la claridad con que se traduzca la institucion previsional en mecanismos economicos.
+\end{alertblock}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Una reforma previsional tiene muchos canales}
+\centering
+\begin{tikzpicture}[node distance=1.25cm, every node/.style={font=\small}]
+\tikzstyle{box}=[rectangle, rounded corners, draw=macropolblue, thick, fill=lightblue, align=center, minimum width=3.0cm, minimum height=0.75cm]
+\tikzstyle{arrow}=[-Latex, thick, color=macropolblue]
+
+\node[box, fill=lightgreen] (reform) {Reforma\\previsional};
+\node[box, below left=of reform, xshift=-0.6cm] (labor) {Mercado\\laboral};
+\node[box, below=of reform] (saving) {Ahorro y fondos\\de pensiones};
+\node[box, below right=of reform, xshift=0.6cm] (fiscal) {Finanzas\\publicas};
+\node[box, below=of saving, yshift=-0.2cm] (macro) {PIB, inversion,\\salarios y consumo};
+\node[box, below=of macro] (micro) {Tasas de reemplazo,\\suficiencia y distribucion};
+
+\draw[arrow] (reform) -- (labor);
+\draw[arrow] (reform) -- (saving);
+\draw[arrow] (reform) -- (fiscal);
+\draw[arrow] (labor) -- (macro);
+\draw[arrow] (saving) -- (macro);
+\draw[arrow] (fiscal) -- (macro);
+\draw[arrow] (macro) -- (micro);
+\end{tikzpicture}
+
+\vspace{0.2cm}
+\small En equilibrio general, los efectos no ocurren aisladamente: se transmiten entre mercados, agentes e instituciones.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Herramientas disponibles para evaluar reformas}
+\centering
+\small
+\begin{tabular}{p{3.0cm} p{4.3cm} p{4.8cm}}
+\toprule
+\textbf{Herramienta} & \textbf{Pregunta que responde} & \textbf{Limitacion principal} \\
+\midrule
+Modelo actuarial & ¿Cuanto pensiona una persona o cohorte? & No captura efectos macroeconomicos ni precios de equilibrio. \\
+\addlinespace
+Econometria & ¿Que relaciones historicas observamos en los datos? & No siempre permite simular reformas estructurales no observadas. \\
+\addlinespace
+Microsimulacion & ¿Quien gana y quien pierde dentro de la poblacion? & Requiere insumos macro: salarios, empleo, inflacion, retornos. \\
+\addlinespace
+CGE & ¿Como reaccionan mercados, precios, empleo, ahorro e inversion? & Agrega hogares y puede perder heterogeneidad distributiva. \\
+\addlinespace
+CGE + Micro & ¿Cual es el impacto macro, fiscal y distributivo integrado? & Requiere consistencia contable, datos y supuestos transparentes. \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Roadmap del curso}
+\centering
+\begin{tikzpicture}[every node/.style={font=\scriptsize}, node distance=0.85cm]
+\tikzstyle{stage}=[rectangle, rounded corners, draw=macropolblue, thick, fill=lightblue, align=center, minimum width=2.45cm, minimum height=1.05cm]
+\tikzstyle{arrow}=[-Latex, thick, color=macropolblue]
+
+\node[stage, fill=lightgreen] (a) {A. Motivacion\\internacional};
+\node[stage, right=of a] (b) {B. Herramientas\\R, Git, matrices};
+\node[stage, right=of b] (c) {C. Microeconomia\\para CGE};
+\node[stage, right=of c] (d) {D. SAM y\\CGE};
+\node[stage, below=of d] (e) {E. Micro-\\simulacion};
+\node[stage, left=of e] (f) {F. Integracion\\macro-micro};
+\node[stage, left=of f, fill=lightgreen] (g) {G. Proyecto\\final};
+
+\draw[arrow] (a) -- (b);
+\draw[arrow] (b) -- (c);
+\draw[arrow] (c) -- (d);
+\draw[arrow] (d) -- (e);
+\draw[arrow] (e) -- (f);
+\draw[arrow] (f) -- (g);
+\end{tikzpicture}
+
+\vspace{0.35cm}
+\begin{block}{Secuencia pedagogica}
+Primero entendemos el problema de politica publica; luego las herramientas; despues la microeconomia; posteriormente la SAM, el CGE y la microsimulacion; finalmente integramos todo en una simulacion de reforma.
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Estructura del curso por bloques}
+\small
+\begin{tabular}{p{2.0cm} p{4.1cm} p{6.0cm}}
+\toprule
+\textbf{Bloque} & \textbf{Tema} & \textbf{Resultado esperado} \\
+\midrule
+A & Evidencia internacional & Identificar preguntas de politica y resultados tipicos de reformas previsionales. \\
+B & Herramientas & Preparar el entorno en R, organizar datos, matrices, funciones y repositorio. \\
+C & Microeconomia & Entender consumidor, empresa, ahorro, oferta laboral y bienestar. \\
+D & SAM y CGE & Construir una SAM simplificada y calibrar un CGE basico con pensiones. \\
+E & Microsimulacion & Simular tasas de reemplazo, suficiencia y cobertura por grupos. \\
+F & Integracion & Conectar resultados macro del CGE con resultados micro de hogares. \\
+G & Proyecto final & Elaborar un informe tecnico de reforma previsional reproducible. \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Producto final del curso}
+\begin{block}{Cada participante o equipo desarrollara una simulacion completa}
+\begin{itemize}
+  \item definicion de una reforma previsional;
+  \item construccion o adaptacion de una SAM simplificada;
+  \item calibracion de un modelo CGE basico;
+  \item simulacion de impactos macroeconomicos;
+  \item microsimulacion de tasas de reemplazo e indicadores distributivos;
+  \item elaboracion de un policy brief tecnico.
+\end{itemize}
+\end{block}
+
+\vspace{0.2cm}
+\begin{alertblock}{Entrega esperada}
+Un informe capaz de responder: \textbf{que cambia, por que cambia, cuanto cambia y para quienes cambia}.
+\end{alertblock}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Por que mirar estudios internacionales}
+\justifying
+Antes de construir el modelo para el caso dominicano, conviene revisar que han respondido modelos similares en otros paises.
+
+\vspace{0.25cm}
+\begin{itemize}
+  \item Permiten identificar canales economicos recurrentes.
+  \item Ayudan a formular escenarios realistas.
+  \item Muestran limites: informalidad, baja densidad de cotizacion, suficiencia y costo fiscal.
+  \item Ayudan a explicar por que una reforma previsional es tambien una reforma macroeconomica.
+\end{itemize}
+
+\vspace{0.25cm}
+\begin{block}{Instituciones que utilizan estas herramientas}
+Banco Mundial, BID, OCDE, FMI, CEPAL, ministerios de hacienda, bancos centrales y superintendencias de pensiones.
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Estudios internacionales: que problemas han respondido}
+\small
+\begin{tabular}{p{2.4cm} p{4.7cm} p{5.2cm}}
+\toprule
+\textbf{Caso} & \textbf{Pregunta de politica} & \textbf{Leccion para el curso} \\
+\midrule
+Chile & ¿Como afecta un sistema de cuentas individuales al ahorro, mercado laboral y suficiencia? & La capitalizacion individual puede fortalecer el ahorro, pero no resuelve por si sola baja densidad e informalidad. \\
+\addlinespace
+Suecia & ¿Como combinar sostenibilidad, edad de retiro y beneficios? & La edad de retiro y los ajustes actuariales son mecanismos centrales de sostenibilidad. \\
+\addlinespace
+Banco Mundial & ¿Como estructurar pilares de proteccion en vejez? & La suficiencia requiere combinar ahorro obligatorio, proteccion contra pobreza y ahorro voluntario. \\
+\addlinespace
+Modelos OLG & ¿Como afectan demografia y politica fiscal a generaciones distintas? & La reforma previsional es intertemporal e intergeneracional. \\
+\bottomrule
+\end{tabular}
+
+\source{World Bank (1994); Auerbach y Kotlikoff; OECD, Pensions at a Glance; estudios de reforma previsional en Chile.}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Caso 1: Chile y cuentas individuales}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\textbf{Pregunta tipica}
+\begin{itemize}
+  \item ¿Que ocurre si aumenta la contribucion previsional?
+  \item ¿Sube el ahorro agregado?
+  \item ¿Mejoran las pensiones?
+  \item ¿Hay efectos sobre empleo e informalidad?
+\end{itemize}
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{block}{Canales del modelo}
+\begin{itemize}
+  \item salario neto;
+  \item costo laboral;
+  \item ahorro obligatorio;
+  \item inversion;
+  \item acumulacion de fondos;
+  \item pension futura.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\vspace{0.2cm}
+\source{Ejemplo motivacional basado en literatura sobre la reforma chilena y modelos dinamicos de equilibrio general aplicados a pensiones.}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Caso 2: Suecia y edad de retiro}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\textbf{Pregunta tipica}
+\begin{itemize}
+  \item ¿Que ocurre si aumenta la edad efectiva de retiro?
+  \item ¿Como cambia la oferta laboral?
+  \item ¿Como se ajusta la sostenibilidad del sistema?
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Resultado conceptual}
+\begin{itemize}
+  \item mas anos de cotizacion;
+  \item menos anos de beneficio;
+  \item mayor acumulacion individual;
+  \item posible aumento del PIB por mayor empleo.
+\end{itemize}
+\end{column}
+\begin{column}{0.4\textwidth}
+\begin{alertblock}{Leccion}
+La edad de retiro no es solo una variable actuarial. Tambien es una variable laboral y macroeconomica.
+\end{alertblock}
+\end{column}
+\end{columns}
+
+\source{OECD, Pensions at a Glance; notas pais sobre Suecia.}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Caso 3: pension minima o pilar solidario}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\textbf{Pregunta tipica}
+\begin{itemize}
+  \item ¿Que pasa si el Estado garantiza una pension minima?
+  \item ¿Cuanto cuesta fiscalmente?
+  \item ¿A quienes beneficia?
+\end{itemize}
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{block}{Aqui la microsimulacion es indispensable}
+\begin{itemize}
+  \item identifica hogares vulnerables;
+  \item calcula brechas de suficiencia;
+  \item mide incidencia por quintil;
+  \item estima cambios en pobreza en vejez.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\vspace{0.2cm}
+\begin{alertblock}{Leccion}
+El CGE muestra impactos agregados; la microsimulacion muestra distribucion, suficiencia y cobertura.
+\end{alertblock}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Caso 4: informalidad y densidad de cotizacion}
+\justifying
+En America Latina, una reforma de capitalizacion individual puede estar bien disenada financieramente y aun asi producir pensiones insuficientes si la densidad de cotizacion es baja.
+
+\vspace{0.25cm}
+\begin{block}{Pregunta clave}
+¿Que pasa si el trabajador no cotiza todos los meses de su vida laboral?
+\end{block}
+
+\vspace{0.2cm}
+\begin{itemize}
+  \item La tasa legal de contribucion no equivale a la tasa efectiva de acumulacion.
+  \item La informalidad reduce fondos acumulados y cobertura.
+  \item Los efectos de reforma dependen de comportamiento laboral y transiciones formal-informal.
+\end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Leccion general de los casos internacionales}
+\centering
+\begin{tikzpicture}[node distance=0.9cm, every node/.style={font=\small}]
+\tikzstyle{box}=[rectangle, rounded corners, draw=macropolblue, thick, align=center, minimum width=4.0cm, minimum height=0.9cm]
+\tikzstyle{arrow}=[-Latex, thick, color=macropolblue]
+
+\node[box, fill=lightgreen] (policy) {Reforma previsional};
+\node[box, below left=of policy, xshift=-1.4cm, fill=lightblue] (macro) {Efectos macro\\PIB, empleo, ahorro, inversion};
+\node[box, below right=of policy, xshift=1.4cm, fill=lightblue] (micro) {Efectos micro\\cobertura, suficiencia, desigualdad};
+\node[box, below=of policy, yshift=-2.0cm, fill=lightgreen] (eval) {Evaluacion integral\\CGE + microsimulacion};
+
+\draw[arrow] (policy) -- (macro);
+\draw[arrow] (policy) -- (micro);
+\draw[arrow] (macro) -- (eval);
+\draw[arrow] (micro) -- (eval);
+\end{tikzpicture}
+
+\vspace{0.3cm}
+\small Ninguna reforma debe evaluarse solo por su impacto promedio: importa tambien la distribucion de los efectos.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Arquitectura macro-micro del curso}
+\centering
+\begin{tikzpicture}[node distance=0.85cm, every node/.style={font=\scriptsize}]
+\tikzstyle{box}=[rectangle, rounded corners, draw=macropolblue, thick, fill=lightblue, align=center, minimum width=3.0cm, minimum height=0.8cm]
+\tikzstyle{arrow}=[-Latex, thick, color=macropolblue]
+
+\node[box, fill=lightgreen] (data) {Datos\\ENFT, ENIGH, administrativos};
+\node[box, below left=of data, xshift=-0.8cm] (sam) {SAM\\matriz contable};
+\node[box, below right=of data, xshift=0.8cm] (microdata) {Base micro\\trabajadores y hogares};
+\node[box, below=of sam] (cge) {CGE\\precios y cantidades};
+\node[box, below=of microdata] (microsim) {Microsimulacion\\cohortes y pensiones};
+\node[box, below right=of cge, xshift=0.8cm, fill=lightgreen] (integration) {Integracion\\macro-micro};
+\node[box, below=of integration, fill=lightgreen] (brief) {Policy brief\\decision publica};
+
+\draw[arrow] (data) -- (sam);
+\draw[arrow] (data) -- (microdata);
+\draw[arrow] (sam) -- (cge);
+\draw[arrow] (microdata) -- (microsim);
+\draw[arrow] (cge) -- (integration);
+\draw[arrow] (microsim) -- (integration);
+\draw[arrow] (integration) -- (brief);
+\end{tikzpicture}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Que es un modelo CGE}
+\begin{block}{Definicion operativa}
+Un modelo de Equilibrio General Computable es una representacion cuantitativa de una economia donde hogares, empresas, gobierno, sector externo y mercados interactuan simultaneamente hasta que oferta y demanda se igualan.
+\end{block}
+
+\vspace{0.2cm}
+En el curso lo usaremos para simular:
+\begin{itemize}
+  \item cambios en contribuciones previsionales;
+  \item acumulacion de fondos de pensiones;
+  \item efectos sobre ahorro, inversion y capital;
+  \item salarios, empleo y consumo;
+  \item costo fiscal de medidas complementarias.
+\end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Que es una microsimulacion previsional}
+\begin{block}{Definicion operativa}
+Una microsimulacion previsional proyecta trayectorias individuales o de grupos de trabajadores para estimar aportes, fondos acumulados, pensiones y tasas de reemplazo bajo distintos escenarios.
+\end{block}
+
+\vspace{0.2cm}
+Variables tipicas:
+\begin{itemize}
+  \item edad, sexo, educacion, quintil de ingreso;
+  \item salario inicial y crecimiento salarial;
+  \item densidad de cotizacion;
+  \item tasa de contribucion;
+  \item retorno financiero;
+  \item edad de retiro;
+  \item expectativa de vida o factor actuarial.
+\end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Por que integrar CGE y microsimulacion}
+\small
+\begin{tabular}{p{3.5cm} p{4.4cm} p{4.4cm}}
+\toprule
+ & \textbf{CGE} & \textbf{Microsimulacion} \\
+\midrule
+Unidad de analisis & Economia completa & Persona, hogar o cohorte \\
+Precios & Endogenos & Usualmente exogenos \\
+Heterogeneidad & Limitada & Alta \\
+Fortaleza & Consistencia macro y de mercados & Distribucion e incidencia \\
+Debilidad & Puede ocultar desigualdad & Puede ignorar retroalimentacion macro \\
+Integracion & Salarios, empleo, retornos e inflacion & Ahorro, beneficios, cobertura y suficiencia \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+\begin{alertblock}{Idea clave}
+El CGE responde \textit{que ocurre con la economia}; la microsimulacion responde \textit{a quienes les ocurre}.
+\end{alertblock}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Sistema de capitalizacion individual dentro del CGE}
+\centering
+\begin{tikzpicture}[node distance=0.8cm, every node/.style={font=\small}]
+\tikzstyle{box}=[rectangle, rounded corners, draw=macropolblue, thick, fill=lightblue, align=center, minimum width=3.4cm, minimum height=0.8cm]
+\tikzstyle{arrow}=[-Latex, thick, color=macropolblue]
+
+\node[box, fill=lightgreen] (worker) {Trabajador formal};
+\node[box, right=of worker] (contrib) {Contribucion\\previsional};
+\node[box, right=of contrib] (fund) {Fondo AFP};
+\node[box, below=of fund] (capital) {Mercado de capitales\\e inversion};
+\node[box, left=of capital] (production) {Empresas\\produccion};
+\node[box, left=of production] (income) {Salarios y\\rentas};
+
+\draw[arrow] (worker) -- (contrib);
+\draw[arrow] (contrib) -- (fund);
+\draw[arrow] (fund) -- (capital);
+\draw[arrow] (capital) -- (production);
+\draw[arrow] (production) -- (income);
+\draw[arrow] (income) -- (worker);
+\end{tikzpicture}
+
+\vspace{0.3cm}
+\small La AFP no es solo un receptor contable de aportes: es un canal entre trabajo, ahorro, mercado financiero, inversion y pensiones futuras.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Ecuacion conceptual de acumulacion previsional}
+\bigquestion{$PF_{i,t+1} = (1+r_t)PF_{i,t} + c_t \cdot w_{i,t} \cdot D_{i,t}$}
+
+\vspace{0.2cm}
+Donde:
+\begin{itemize}
+  \item $PF_{i,t}$: fondo previsional del individuo $i$;
+  \item $r_t$: retorno financiero del fondo;
+  \item $c_t$: tasa de contribucion;
+  \item $w_{i,t}$: salario cotizable;
+  \item $D_{i,t}$: indicador o densidad de cotizacion efectiva.
+\end{itemize}
+
+\vspace{0.2cm}
+\begin{alertblock}{Conexion macro-micro}
+El CGE puede generar $w_t$, $r_t$ y empleo; la microsimulacion aplica esos cambios a individuos o cohortes.
+\end{alertblock}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{El bloque de herramientas del curso}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Herramientas computacionales}
+\begin{itemize}
+  \item R y RStudio;
+  \item estructura de proyectos;
+  \item Git y GitHub;
+  \item lectura, limpieza y transformacion de datos;
+  \item visualizacion de resultados.
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Herramientas matematicas}
+\begin{itemize}
+  \item algebra matricial;
+  \item sistemas de ecuaciones;
+  \item optimizacion numerica;
+  \item calibracion;
+  \item analisis de escenarios.
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.25cm}
+\begin{block}{Objetivo}
+Que el participante no solo entienda el modelo, sino que pueda reconstruirlo, auditarlo y adaptarlo.
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}[fragile]{Toolkit computacional MACROPOL}
+\begin{lstlisting}
+Curso_CGE_Pensiones/
+|
+|-- data/
+|   |-- raw/
+|   |-- processed/
+|
+|-- sam/
+|   |-- 01_construccion_sam.R
+|
+|-- cge/
+|   |-- 02_calibracion_cge.R
+|   |-- 03_simulacion_reforma.R
+|
+|-- microsim/
+|   |-- 04_tasas_reemplazo.R
+|
+|-- integration/
+|   |-- 05_integracion_macro_micro.R
+|
+|-- outputs/
+|-- policy_brief/
+|-- README.md
+\end{lstlisting}
+
+\vspace{0.1cm}
+\small Esta estructura convierte el curso en un laboratorio reproducible de evaluacion de reformas previsionales.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Microeconomia necesaria antes del CGE}
+\justifying
+Antes de calibrar el modelo, haremos un repaso aplicado de microeconomia. No sera un curso teorico completo, sino un puente entre intuicion economica y modelizacion computacional.
+
+\vspace{0.25cm}
+\begin{itemize}
+  \item consumidor: consumo, ocio, ahorro y bienestar;
+  \item empresa: funcion de produccion y demanda de factores;
+  \item mercado laboral: salario neto, costo laboral y formalidad;
+  \item ahorro intertemporal: consumo presente vs. consumo futuro;
+  \item equilibrio: precios que ajustan oferta y demanda;
+  \item bienestar: eficiencia, suficiencia y equidad.
+\end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{La SAM: la fotografia contable de la economia}
+\begin{block}{Definicion}
+La Matriz de Contabilidad Social, SAM, organiza los flujos de ingresos y gastos entre sectores productivos, factores, hogares, gobierno, AFP, inversion y resto del mundo.
+\end{block}
+
+\vspace{0.2cm}
+En el curso construiremos una SAM simplificada con cuentas para:
+\begin{itemize}
+  \item sectores productivos;
+  \item trabajo y capital;
+  \item hogares por grupo;
+  \item gobierno;
+  \item sistema previsional / AFP;
+  \item ahorro-inversion;
+  \item resto del mundo.
+\end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Reformas que simularemos}
+\begin{columns}[T]
+\begin{column}{0.32\textwidth}
+\begin{block}{Parametricas}
+\begin{itemize}
+  \item contribucion;
+  \item edad de retiro;
+  \item comision;
+  \item tasa de reemplazo objetivo.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.32\textwidth}
+\begin{block}{Estructurales}
+\begin{itemize}
+  \item pilar solidario;
+  \item pension minima;
+  \item subsidio a cotizacion;
+  \item sistema mixto.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.32\textwidth}
+\begin{block}{Escenarios}
+\begin{itemize}
+  \item menor crecimiento;
+  \item menor retorno;
+  \item mayor informalidad;
+  \item envejecimiento.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Indicadores de salida}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Macroeconomicos}
+\begin{itemize}
+  \item PIB;
+  \item consumo;
+  \item inversion;
+  \item ahorro nacional;
+  \item empleo formal e informal;
+  \item salarios;
+  \item acumulacion de capital.
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Previsionales y distributivos}
+\begin{itemize}
+  \item fondo acumulado;
+  \item pension esperada;
+  \item tasa de reemplazo;
+  \item cobertura;
+  \item suficiencia;
+  \item pobreza en vejez;
+  \item incidencia por quintil y genero.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Cronograma sugerido de 15 sesiones}
+\scriptsize
+\begin{tabular}{p{1.1cm} p{4.2cm} p{6.7cm}}
+\toprule
+\textbf{Sesion} & \textbf{Bloque} & \textbf{Contenido} \\
+\midrule
+1 & Motivacion y roadmap & Evidencia internacional, preguntas de politica, arquitectura CGE-micro. \\
+2 & Herramientas I & R, estructura del proyecto, limpieza de datos, visualizacion. \\
+3 & Herramientas II & Algebra matricial, sistemas, optimizacion y Git. \\
+4 & Microeconomia I & Consumidor, ahorro intertemporal y oferta laboral. \\
+5 & Microeconomia II & Empresa, produccion, equilibrio y bienestar. \\
+6 & SAM I & Cuentas, flujos, balance contable y estructura previsional. \\
+7 & SAM II & Construccion de SAM simplificada en R. \\
+8 & CGE I & Ecuaciones, calibracion y cierre del modelo. \\
+9 & CGE II & Simulacion de aumento de contribuciones. \\
+10 & CGE III & Escenarios macrofinancieros y sensibilidad. \\
+11 & Microsimulacion I & Trayectorias laborales, salarios y densidad de cotizacion. \\
+12 & Microsimulacion II & Tasas de reemplazo y suficiencia por grupos. \\
+13 & Integracion & Top-down, bottom-up e integracion hibrida. \\
+14 & Comunicacion & Graficos, policy brief y presentacion de resultados. \\
+15 & Proyecto final & Presentacion y discusion de simulaciones. \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Como leer resultados de modelos}
+\begin{block}{Tres preguntas de interpretacion}
+\begin{enumerate}
+  \item \textbf{Mecanismo:} ¿por que cambia la variable?
+  \item \textbf{Magnitud:} ¿cuanto cambia respecto al escenario base?
+  \item \textbf{Incidencia:} ¿quien se beneficia y quien enfrenta costos?
+\end{enumerate}
+\end{block}
+
+\vspace{0.25cm}
+\begin{alertblock}{Advertencia metodologica}
+Un resultado de CGE no es una prediccion mecanica. Es un experimento condicionado por supuestos, datos, elasticidades, cierre macroeconomico y escenario de referencia.
+\end{alertblock}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Lecturas y referencias iniciales}
+\small
+\begin{itemize}
+  \item World Bank (1994). \textit{Averting the Old Age Crisis: Policies to Protect the Old and Promote Growth}.
+  \item Auerbach, A. y Kotlikoff, L. \textit{Dynamic Fiscal Policy}.
+  \item OECD. \textit{Pensions at a Glance} y notas pais sobre reformas previsionales.
+  \item Estudios aplicados de modelos dinamicos de equilibrio general para reformas previsionales en Chile.
+  \item Documentos nacionales sobre el sistema de capitalizacion individual y datos laborales de encuestas de hogares.
+\end{itemize}
+
+\vspace{0.3cm}
+\begin{block}{Uso en el curso}
+Estas lecturas no se usaran como teoria abstracta, sino como ejemplos de preguntas, escenarios, mecanismos y formas de presentar resultados.
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Mensaje de cierre}
+\bigquestion{El objetivo no es aprender software.}
+
+\bigquestion{El objetivo es transformar una reforma previsional en un experimento cuantitativo reproducible.}
+
+\vspace{0.3cm}
+\begin{center}
+\large\color{macropolgreen}\textbf{Datos $\rightarrow$ modelo $\rightarrow$ resultados $\rightarrow$ decision publica}
+\end{center}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}
+\centering
+\Huge\color{macropolblue}\textbf{Gracias}
+
+\vspace{0.5cm}
+\Large Preguntas y comentarios
+
+\vspace{0.8cm}
+\normalsize MACROPOL: Economia Aplicada y Politicas Publicas
+\end{frame}
+
+\end{document}
